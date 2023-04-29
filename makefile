@@ -1,6 +1,6 @@
 CC = g++
 CPPFLAGS = -g -Wall
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++17
 
 main: main.o 
 	$(CC) $(CXXFLAGS) $(CPPFLAGS) -o winzigc main.o 
