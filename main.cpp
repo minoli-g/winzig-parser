@@ -26,13 +26,9 @@ int main(int argc, char *argv[]){
         std::cout << "Error: Could not read file. \n";
     }
 
-    // Read the tokens in from the file
-    std::vector<std::string> token_strings{ };
-    while(file.good()){
-        std::string next_token;              
-        file >> next_token; 
-        token_strings.push_back(next_token);
-    }
+    // Read the content of the file
+    std::string content (std::istreambuf_iterator<char>{file}, {});
+    std::cout << content;
     file.close();
 
     // Convert the tokens into enum types
