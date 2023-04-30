@@ -3,6 +3,9 @@
 #include <fstream>
 #include <vector>
 
+#include "lex.hpp"
+#include "token.hpp"
+
 int main(int argc, char *argv[]){
 
     std::cout << "Program started \n";
@@ -28,12 +31,15 @@ int main(int argc, char *argv[]){
 
     // Read the content of the file
     std::string content (std::istreambuf_iterator<char>{file}, {});
-    std::cout << content;
     file.close();
 
-    // Convert the tokens into enum types
-    // Parse the enum list and return a tree
-    // Print the tree / save to file
+    // Convert the content into tokens
+    Lexer lexer (content);
+    std::vector<Token> token_sequence = lexer.parse();
+
+    for (Token t: token_sequence){
+        std::cout << t.getType() << " : " <<t.getValue() << "\n";
+    }
 
     return 0;
 }
