@@ -17,7 +17,9 @@ class Lexer {
 
     public:
         Lexer(std::string content);
-        std::vector<Token> parse();
+        void parse();
+
+        std::vector<Token> getTokenSequence();
 
         bool positionValid();
 

@@ -35,8 +35,14 @@ int main(int argc, char *argv[]){
 
     // Convert the content into tokens
     Lexer lexer (content);
-    std::vector<Token> token_sequence = lexer.parse();
+    try{
+        lexer.parse();     
+    }
+    catch (const std::runtime_error& err){
+        std::cout << err.what() << "\n"; 
+    }
 
+    std::vector<Token> token_sequence = lexer.getTokenSequence();
     for (Token t: token_sequence){
         std::cout << t.getType() << " : " <<t.getValue() << "\n";
     }

@@ -18,7 +18,7 @@ bool Lexer::positionValid(){
     return false;
 }
 
-std::vector<Token> Lexer::parse(){
+void Lexer::parse(){
 
     while (positionValid()){
         if (! consumePredefinedTokenIfPresent() ){
@@ -45,7 +45,6 @@ std::vector<Token> Lexer::parse(){
         }
         consumeWhitespaceIfPresent();
     }
-    return tokens;
 }
 
 void Lexer::consumeWhitespaceIfPresent(){
@@ -164,3 +163,6 @@ void Lexer::consumeCommentTwo(){
     }
 }
 
+std::vector<Token> Lexer::getTokenSequence(){
+    return tokens;
+}
