@@ -1,6 +1,7 @@
 #include "lex.hpp"
 #include <cctype>
 #include <iostream>
+#include <stdexcept>
 
 std::unordered_set<char> Lexer::whitespaces = {' ', '\t', '\n', '\f', '\r', '\v'};
 
@@ -89,8 +90,7 @@ void Lexer::consumeIdentifier(){
         position++;
     }
     else {
-        std::cout << "Invalid character encountered while parsing identifier token \n";
-        exit(0);
+        throw std::runtime_error("Invalid character encountered while parsing integer token.\n");
     }
 }
 
@@ -110,8 +110,7 @@ void Lexer::consumeInteger(){
         position++;
     }
     else {
-        std::cout << "Invalid non-digit character encountered while parsing integer token \n";
-        exit(0);
+        throw std::runtime_error("Invalid non-digit character encountered while parsing integer token \n");
     }
 }
 
@@ -121,19 +120,16 @@ void Lexer::consumeChar(){
 
     position ++;
     if (positionValid() && *position =='\''){
-        std::cout << "Invalid char token \n";
-        exit(0);
+        throw std::runtime_error("Invalid char token \n");
     }
 
     position ++;
     if (positionValid() && *position !='\''){
-        std::cout << "Invalid char token \n";
-        exit(0);
+        throw std::runtime_error("Invalid char token \n");
     }
 
     if (!positionValid()){ 
-        std::cout << "EOF reached while parsing char \n";
-        exit(0);
+        throw std::runtime_error("EOF reached while parsing char \n");
     }
     tokens.push_back( Token(CHAR, std::string(temp+1, temp+2)) );
     position ++;
@@ -160,8 +156,7 @@ void Lexer::consumeCommentTwo(){
         position++;
     }
     if (!positionValid()){ 
-        std::cout << "EOF reached while parsing multiline comment \n";
-        exit(0);
+        throw std::runtime_error("EOF reached while parsing multiline comment \n");
     }
     if (*position == '}'){
         tokens.push_back( Token(COMMENT_2, std::string(temp, position)) );
