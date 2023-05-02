@@ -58,14 +58,14 @@ bool Lexer::consumePredefinedTokenIfPresent(){
     // following the current pointer location
 
     for (auto it: Token::predefined_tokens){
-        std::string token_value = it.first;
+        std::string token_value = it.second;
         int token_length = token_value.size();
 
         if (position+token_length < content.end()){
             std::string content_slice (position, position+token_length);
             if (content_slice == token_value){
                 position += token_length;
-                tokens.push_back( Token(it.second, token_value) );  // TODO - replace constructor
+                tokens.push_back( Token(it.first, token_value) );  // TODO - replace constructor
                 return true;
             }
         }
