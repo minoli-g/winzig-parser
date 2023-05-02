@@ -103,6 +103,6 @@ TokenType Token::identifyNonPredefinedTokenType(char c){
     if (c=='{'){
         return COMMENT_2;
     }
-    std::cout << "Unexpected character encountered: token could not be identified.\n";
-    exit(0);
+    throw std::runtime_error("Unexpected character ("+
+                            std::string(1,c) + ") encountered: token could not be identified.\n");
 }
