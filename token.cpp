@@ -10,8 +10,8 @@ std::unordered_map <std::string, TokenType> Token::predefined_tokens = {
     {"loop", LOOP}, {"pool", POOL}, {"exit", EXIT}, {"<=", LEQ}, {"<>", NEQ}, {"<", LE}, {">=", GEQ}, 
     {">", GE}, {"=", EQ}, {"mod", MOD}, {"and", AND}, {"or", OR}, {"not", NOT}, {"read", READ}, 
     {"succ", SUCC}, {"pred", PRED}, {"chr", CHR}, {"ord", ORD}, {"eof", EOFT},
-    {"{", BLKBEGIN}, {":", COLON}, {";", SEMICOLON}, {".", PERIOD}, 
-    {",", COMMA}, {"{", OPENBRKT}, {"}", CLSBRKT}, {"+", PLUS}, {"-", MINUS}, {"*", MULT}, {"/", DIVIDE}
+    {":", COLON}, {";", SEMICOLON}, {".", PERIOD}, 
+    {",", COMMA}, {"(", OPENBRKT}, {")", CLSBRKT}, {"+", PLUS}, {"-", MINUS}, {"*", MULT}, {"/", DIVIDE}
 };
 
 Token::Token(TokenType type, std::string value) {
