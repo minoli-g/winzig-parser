@@ -81,16 +81,7 @@ void Lexer::consumeIdentifier(){
     while (positionValid() && (isalnum(*position) || *position=='_' )){
         position++;
     }
-    if (!positionValid()){  // End of file has been reached - that is okay
-        tokens.push_back( Token(IDENTIFER, std::string(temp, position)) );
-    }
-    if (whitespaces.count(*position)){  // Token was terminated by a whitespace
-        tokens.push_back( Token(IDENTIFER, std::string(temp, position)) );
-        position++;
-    }
-    else {
-        throw std::runtime_error("Invalid character encountered while parsing integer token.\n");
-    }
+    tokens.push_back( Token(IDENTIFER, std::string(temp, position)) );
 }
 
 void Lexer::consumeInteger(){
@@ -101,16 +92,7 @@ void Lexer::consumeInteger(){
     while (positionValid() && isdigit(*position) ){
         position++;
     }
-    if (!positionValid()){  // End of file has been reached - that is okay
-        tokens.push_back( Token(INTEGER, std::string(temp, position)) );
-    }
-    if (whitespaces.count(*position)){
-        tokens.push_back( Token(INTEGER, std::string(temp, position)) );
-        position++;
-    }
-    else {
-        throw std::runtime_error("Invalid non-digit character encountered while parsing integer token \n");
-    }
+    tokens.push_back( Token(INTEGER, std::string(temp, position)) );
 }
 
 void Lexer::consumeChar(){
