@@ -1,5 +1,7 @@
 #include "token.hpp"
 #include <cctype>
+#include <unordered_set>
+#include <stdexcept>
 #include "iostream"
 
 std::unordered_map <TokenType, std::string> Token::predefined_tokens = {
@@ -60,6 +62,17 @@ std::unordered_map <TokenType, std::string> Token::predefined_tokens = {
 Token::Token(TokenType type, std::string value) {
     this->type = type;
     this->value = value;
+}
+
+Token::Token(TokenType type){
+    std::unordered_set<TokenType> not_predefined = {IDENTIFER, INTEGER, CHAR, COMMENT_1, COMMENT_2};
+    if (not_predefined.count(type)){
+        throw std::runtime_error("String argument required to construct non-predefined token");
+    }
+    else {
+        this->type = type;
+        this->value = predefined_tokens[type];
+    }
 }
 
 TokenType Token::getType(){

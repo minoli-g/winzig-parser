@@ -23,6 +23,7 @@ class Token {
     public:
         static std::unordered_map<TokenType, std::string> predefined_tokens;
 
+        Token(TokenType type);
         Token(TokenType type, std::string value);
         static TokenType identifyNonPredefinedTokenType(char c);
 
