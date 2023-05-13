@@ -33,6 +33,8 @@ void Lexer::parse(){
                 case CHAR:
                     consumeChar();
                     break;
+                case STRING:
+                    consumeString();
                 case COMMENT_1:
                     consumeCommentOne();
                     break;
@@ -140,7 +142,7 @@ void Lexer::consumeCommentTwo(){
         throw std::runtime_error("EOF reached while parsing multiline comment \n");
     }
     if (*position == '}'){
-        tokens.push_back( Token(COMMENT_2, std::string(temp, position)) );
+        tokens.push_back( Token(COMMENT_2, std::string(temp, position+1)) );
         position++;
     }
 }
