@@ -228,4 +228,226 @@ void Parser::parseFcn(){
     buildTree(TreeNodeType::FCN, 8);
 }
 
+// Parses the production
+// Params -> Dcln list ';' => "params"
+void Parser::parseParams(){
+    parseDcln();
+    int n=1;
+    while (peekNextToken().getType() == TokenType::IDENTIFER){
+        parseDcln();
+        n++;
+    }
+    buildTree(TreeNodeType::PARAMS, n);
+}
 
+// Parses the productions
+// Dclns -> 'var' (Dcln ';')+ => "dclns"
+//       ->                   => "dclns"
+void Parser::parseDclns(){
+
+    if (peekNextToken().getType() == TokenType::VAR){
+        readExpectedToken(TokenType::VAR);
+        parseDcln();
+        readExpectedToken(TokenType::SEMICOLON);
+
+        int n=1;
+        while (peekNextToken().getType() == TokenType::IDENTIFER){
+            parseDcln();
+            readExpectedToken(TokenType::SEMICOLON);
+            n++;
+        }
+        buildTree(TreeNodeType::DCLNS, n);
+    }
+    else {
+        buildTree(TreeNodeType::DCLNS, 0);
+    }
+}
+
+// Parses the production
+// Dcln -> Name list ',' ':' Name => "var";
+void Parser::parseDcln(){
+    parseName();
+    int n=1;
+    while (peekNextToken().getType() == TokenType::COMMA){
+        readExpectedToken(TokenType::COMMA);
+        parseName();
+        n++;
+    }
+    readExpectedToken(TokenType::SEMICOLON);
+    parseName();
+    buildTree(TreeNodeType::VAR, n+1);
+}
+
+// Parses the production
+// Body -> 'begin' Statement list ';' 'end' => "block";
+void Parser::parseBody(){
+    readExpectedToken(TokenType::BEGIN);
+    parseStatement();
+    int n=1;
+    while (peekNextToken().getType() == TokenType::SEMICOLON){
+        readExpectedToken(TokenType::SEMICOLON);
+        parseStatement();
+        n++;
+    }
+    readExpectedToken(TokenType::END);
+    buildTree(TreeNodeType::BLOCK, n);
+}
+
+// Parses the productions
+// Statement -> Assignment
+//           -> 'output' '(' OutExp list ',' ')'                         => "output"
+//           -> 'if' Expression 'then' Statement ('else' Statement)?     => "if"
+//           -> 'while' Expression 'do' Statement                        => "while"
+//           -> 'repeat' Statement list ';' 'until' Expression           => "repeat"
+//           -> 'for' '(' ForStat ';' ForExp ';' ForStat ')' Statement   => "for"
+//           -> 'loop' Statement list ';' 'pool'                         => "loop"
+//           -> 'case' Expression 'of' Caseclauses OtherwiseClause 'end' => "case"
+//           -> 'read' '(' Name list ',' ')' => "read"
+//           -> 'exit'                       => "exit"
+//           -> 'return' Expression          => "return"
+//           -> Body
+//           ->                              => "<null>"
+void Parser::parseStatement(){
+    switch (peekNextToken().getType()){
+
+        case TokenType::OUTPUT:
+            readExpectedToken(TokenType::OUTPUT);
+            readExpectedToken(TokenType::OPENBRKT);
+            parseOutExp();
+            int n = 1;
+            while (peekNextToken().getType() == TokenType::COMMA){
+                readExpectedToken(TokenType::COMMA);
+                parseOutExp();
+                n++;
+            }
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::OUTPUT, n);
+            break;
+
+        case TokenType::IF:
+            readExpectedToken(TokenType::IF);
+            parseExpression();
+            readExpectedToken(TokenType::THEN);
+            parseStatement();
+            int n = 2;
+            if (peekNextToken().getType() == TokenType::ELSE){
+                readExpectedToken(TokenType::ELSE);
+                parseStatement();
+                n ++;
+            }
+            buildTree(TreeNodeType::IF, n);
+            break;
+
+        case TokenType::WHILE:
+            readExpectedToken(TokenType::WHILE);
+            parseExpression();
+            readExpectedToken(TokenType::DO);
+            parseStatement();
+            buildTree(TreeNodeType::WHILE, 2);
+            break;
+        
+        case TokenType::REPEAT:
+            readExpectedToken(TokenType::REPEAT);
+            parseStatement();
+            int n=1;
+            while (peekNextToken().getType() == TokenType::SEMICOLON){
+                readExpectedToken(TokenType::SEMICOLON);
+                parseStatement();
+                n ++;
+            }
+            readExpectedToken(TokenType::UNTIL);
+            parseExpression();
+            buildTree(TreeNodeType::REPEAT, n+1);
+            break;
+
+        case TokenType::FOR:
+            readExpectedToken(TokenType::FOR);
+            readExpectedToken(TokenType::OPENBRKT);
+            parseForStat();
+            readExpectedToken(TokenType::SEMICOLON);
+            parseForExp();
+            readExpectedToken(TokenType::SEMICOLON);
+            parseForStat();
+            readExpectedToken(TokenType::CLSBRKT);
+            parseStatement();
+            buildTree(TreeNodeType::FOR, 4);
+            break;
+
+        case TokenType::LOOP:
+            readExpectedToken(TokenType::LOOP);
+            parseStatement();
+            int n=1;
+            while (peekNextToken().getType() == TokenType::SEMICOLON){
+                readExpectedToken(TokenType::SEMICOLON);
+                parseStatement();
+                n ++;
+            }
+            readExpectedToken(TokenType::POOL);
+            buildTree(TreeNodeType::LOOP, n);
+            break;
+
+        case TokenType::CASE:
+            readExpectedToken(TokenType::CASE);
+            parseExpression();
+            readExpectedToken(TokenType::OF);
+            parseCaseclauses();
+            parseOtherwiseClause();
+            readExpectedToken(TokenType::END);
+            buildTree(TreeNodeType::CASE, 3);
+            break;
+
+        case TokenType::READ:
+            readExpectedToken(TokenType::READ);
+            readExpectedToken(TokenType::OPENBRKT);
+            parseName();
+
+            int n=1;
+            while (peekNextToken().getType() == TokenType::COMMA){
+                readExpectedToken(TokenType::COMMA);
+                parseName();
+                n ++;
+            }
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::READ, n);
+            break;
+
+        case TokenType::EXIT:
+            readExpectedToken(TokenType::EXIT);
+            buildTree(TreeNodeType::EXIT, 0);
+            break;
+
+        case TokenType::RETURN:
+            readExpectedToken(TokenType::RETURN);
+            parseExpression();
+            buildTree(TreeNodeType::RETURN, 1);
+            break;
+
+        case TokenType::IDENTIFER:
+            // All Assignment productions begin with this token
+            parseAssignment();
+            break;
+
+        case TokenType::BEGIN:
+            // All Body productions begin with this token
+            parseBody();
+            break;
+
+        default:
+            buildTree(TreeNodeType::NNULL, 0);
+            break;
+    }
+}
+
+// Parses the productions
+// OutExp -> Expression => "integer"
+//        -> StringNode => "string";
+void Parser::parseOutExp(){
+    if (peekNextToken().getType() == TokenType::STRING){
+        parseStringNode();
+        buildTree(TreeNodeType::STRING, 1);
+    }
+    else {
+        parseExpression();
+        buildTree(TreeNodeType::INTEGER, 1);
+    }
+}
