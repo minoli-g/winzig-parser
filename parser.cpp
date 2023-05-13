@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 Parser::Parser(std::vector<Token> tokens){
+    //TODO - Strip comment tokens from the list
     this->tokens = tokens;
     this->position = this->tokens.begin();
     this->stack = { };
@@ -118,6 +119,113 @@ void Parser::parseConsts(){
         readExpectedToken(TokenType::SEMICOLON);
         buildTree(TreeNodeType::CONSTS, n);
     }
+}
+
+// Parses the productions
+// Const -> Name '=' ConstValue => "const"
+void Parser::parseConst(){
+    parseName();
+    readExpectedToken(TokenType::EQ);
+    parseConstValue();
+    buildTree(TreeNodeType::CONST, 2);
+}
+
+// Parses the productions
+//ConstValue -> '<integer>'
+//           -> '<char>'
+//           -> Name;
+void Parser::parseConstValue(){
+    switch (peekNextToken().getType()){
+        case TokenType::INTEGER:
+            readExpectedToken(TokenType::INTEGER);
+            break;
+        case TokenType::CHAR:
+            readExpectedToken(TokenType::CHAR);
+            break;
+        default:
+            parseName();
+            break;
+    }
+}
+
+// Parses the productions
+// Types -> 'type' (Type ';')+ => "types"
+//       ->                    => "types";
+void Parser::parseTypes(){
+    if (peekNextToken().getType() == TokenType::TYPE){
+        readExpectedToken(TokenType::TYPE);
+
+        parseType();
+        readExpectedToken(TokenType::SEMICOLON);
+
+        int n=1;
+        while (peekNextToken().getType() == TokenType::IDENTIFER){
+            parseType();
+            readExpectedToken(TokenType::SEMICOLON);
+            n++;
+        }
+
+        buildTree(TreeNodeType::TYPES, n);
+    }
+    else {
+        buildTree(TreeNodeType::TYPES, 0);
+    }
+}
+
+// Parses the production
+// Type -> Name '=' LitList => "type"
+void Parser::parseType(){
+    parseName();
+    readExpectedToken(TokenType::EQ);
+    parseLitList();
+    buildTree(TreeNodeType::TYPE, 2);
+}
+
+// Parses the production
+// LitList -> '(' Name list ',' ')' => "lit"
+void Parser::parseLitList(){
+    readExpectedToken(TokenType::OPENBRKT);
+    parseName();
+
+    int n = 1;
+    while (peekNextToken().getType() != TokenType::SEMICOLON){
+        readExpectedToken(TokenType::COMMA);
+        parseName();
+        n ++;
+    }
+    readExpectedToken(TokenType::CLSBRKT);
+    buildTree(TreeNodeType::TYPE, n);
+}
+
+// Parses the production
+// SubProgs -> Fcn* => "subprogs"
+void Parser::parseSubProgs(){
+    int n = 0;
+    while (peekNextToken().getType()==TokenType::FUNCTION){
+        parseFcn();
+        n++;
+    }
+    buildTree(TreeNodeType::SUBPROGS, n);
+}
+
+// Parses the production
+// Fcn -> 'function' Name '(' Params ')' ':' Name ';' Consts Types Dclns Body Name ';' => "fcn"
+void Parser::parseFcn(){
+    readExpectedToken(TokenType::FUNCTION);
+    parseName();
+    readExpectedToken(TokenType::OPENBRKT);
+    parseParams();
+    readExpectedToken(TokenType::CLSBRKT);
+    readExpectedToken(TokenType::SEMICOLON);
+    parseName();
+    readExpectedToken(TokenType::SEMICOLON);
+    parseConsts();
+    parseTypes();
+    parseDclns();
+    parseBody();
+    parseName();
+    readExpectedToken(TokenType::SEMICOLON);
+    buildTree(TreeNodeType::FCN, 8);
 }
 
 
