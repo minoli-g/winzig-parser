@@ -118,6 +118,23 @@ void Lexer::consumeChar(){
     position ++;
 }
 
+void Lexer::consumeString(){
+    // position iterator is on the first double quote of the string, which was already checked
+    std::string::iterator temp { position };
+
+    position ++;
+    while (positionValid() && *position!='"'){
+        position ++;
+    }
+    if (!positionValid()){ 
+        throw std::runtime_error("EOF reached while parsing string \n");
+    }
+    if (*position == '"'){
+        tokens.push_back( Token(STRING, std::string(temp+1, position)) );
+        position++;
+    }
+}
+
 void Lexer::consumeCommentOne(){
     // position iterator is on the first letter of the identifier, which was already checked
     std::string::iterator temp { position };

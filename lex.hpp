@@ -28,6 +28,7 @@ class Lexer {
         void consumeIdentifier();
         void consumeInteger();
         void consumeChar();
+        void consumeString();
         void consumeCommentOne();
         void consumeCommentTwo();
 };
