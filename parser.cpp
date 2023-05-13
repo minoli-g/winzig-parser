@@ -83,6 +83,41 @@ void Parser::buildTree(TreeNodeType type, int num_children){
 
 }
 
+// Parses the production
+// Winzig -> 'program' Name ':' Consts Types Dclns SubProgs Body Name '.' => "program"
+void Parser::parseWinzig(){
+    readExpectedToken(TokenType::PROGRAM);
+    parseName();
+    readExpectedToken(TokenType::SEMICOLON);
+    parseConsts();
+    parseTypes();
+    parseDclns();
+    parseSubProgs();
+    parseBody();
+    parseName();
+    readExpectedToken(TokenType::PERIOD); 
+    buildTree(TreeNodeType::PROGRAM, 7);   
+}
 
+// Parse the productions
+// Consts -> 'const' Const list ',' ';' => "consts"
+//        ->                            => "consts";
+void Parser::parseConsts(){
+    if (peekNextToken().getType() != TokenType::CONST){
+        buildTree(TreeNodeType::CONSTS, 0);
+    }
+    else {
+        readExpectedToken(TokenType::CONST);
+        parseConst();
+        int n = 1;
+        while (peekNextToken().getType() != TokenType::SEMICOLON){
+            readExpectedToken(TokenType::COMMA);
+            parseConst();
+            n ++;
+        }
+        readExpectedToken(TokenType::SEMICOLON);
+        buildTree(TreeNodeType::CONSTS, n);
+    }
+}
 
 
