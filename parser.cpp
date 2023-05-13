@@ -500,3 +500,402 @@ int Parser::parseOutExp(){
         return 1;
     }
 }
+
+// Parses the production
+// StringNode -> '<string>'
+// Returns the number of tree nodes pushed to stack
+int Parser::parseStringNode(){
+    readExpectedToken(TokenType::STRING);
+    return 1;
+}
+
+// Parses the production
+// Caseclauses-> (Caseclause ';')+
+// Returns the number of tree nodes added to the stack
+int Parser::parseCaseclauses(){
+    int tn = 0;
+    tn += parseCaseclause();
+    readExpectedToken(TokenType::SEMICOLON);
+    
+    std::unordered_set<TokenType> select_set = {TokenType::INTEGER, TokenType::IDENTIFER, TokenType::CHAR};
+    while (select_set.count(peekNextToken().getType())){
+        tn += parseCaseclause();
+        readExpectedToken(TokenType::SEMICOLON);
+    }
+    return tn;
+}
+
+// Parses the production
+// Caseclause -> CaseExpression list ',' ':' Statement => "case_clause"
+// Returns the number of tree nodes added to the stack
+int Parser::parseCaseclause(){
+    int tn = 0;
+    tn += parseCaseExpression();
+
+    while (peekNextToken().getType() == TokenType::COMMA){
+        readExpectedToken(TokenType::COMMA);
+        tn += parseCaseExpression();
+    }
+    readExpectedToken(TokenType::COLON);
+    tn += parseStatement();
+    buildTree(TreeNodeType::CASECLAUSE, tn);
+    return 1;
+}
+
+// Parses the production
+// CaseExpression -> ConstValue
+//                -> ConstValue '..' ConstValue => ".."
+// Returns the number of tree nodes added to the stack
+int Parser::parseCaseExpression(){
+    int tn = parseConstValue();
+    if (peekNextToken().getType() == TokenType::DOTS){
+        readExpectedToken(TokenType::DOTS);
+        tn += parseConstValue();
+        buildTree(TreeNodeType::DOTS, tn);
+        return 1;
+    }
+    else {
+        return tn;
+    }
+}
+
+// Parses the production
+// OtherwiseClause -> 'otherwise' Statement => "otherwise"
+//                 -> 
+// Returns the number of tree nodes added to the stack
+int Parser::parseOtherwiseClause(){
+    if (peekNextToken().getType() == TokenType::OTHERWISE){
+        readExpectedToken(TokenType::OTHERWISE);
+        int tn = parseStatement();
+        buildTree(TreeNodeType::OTHERWISE, tn);
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+// Parses the productions
+// Assignment -> Name ':=' Expression => "assign"
+//            -> Name ':=:' Name      => "swap"
+// Returns the number of tree nodes added to the stack
+int Parser::parseAssignment(){
+    int tn = parseName();
+    if (peekNextToken().getType() == TokenType::ASSIGN){
+        readExpectedToken(TokenType::ASSIGN);
+        tn += parseExpression();
+        buildTree(TreeNodeType::ASSIGN, tn);
+        return 1;
+    }
+    else {
+        readExpectedToken(TokenType::SWAP);
+        tn += parseName();
+        buildTree(TreeNodeType::SWAP, tn);
+        return 1;
+    }
+}
+
+// Parses the productions
+// ForStat -> Assignment
+//         ->             => "<null>"
+// Returns the number of tree nodes added to the stack
+int Parser::parseForStat(){
+    // Select set of Assignment is { Identifier }
+    if (peekNextToken().getType() == TokenType::IDENTIFER){
+        return parseAssignment();
+    }
+    else{
+        buildTree(TreeNodeType::NNULL, 0);
+        return 1;
+    }
+}
+
+// Parses the productions
+// ForExp -> Expression
+//        ->              => "true"
+// Returns the number of tree nodes added to the stack
+int Parser::parseForExp(){
+    std::unordered_set<TokenType> select_set = {
+        TokenType::MINUS, TokenType::PLUS, TokenType::NOT, TokenType::EOFT, TokenType::IDENTIFER,
+        TokenType::INTEGER, TokenType::CHAR, TokenType::OPENBRKT, 
+        TokenType::SUCC, TokenType::PRED, TokenType::CHR, TokenType::ORD
+    };
+
+    if (select_set.count(peekNextToken().getType())){
+        return parseExpression();
+    }
+    else {
+        buildTree(TreeNodeType::TRUE, 0);
+        return 1;
+    }
+}
+
+// Parses the productions
+// Expression -> Term
+//            -> Term '<=' Term  => "<="
+//            -> Term '<' Term   => "<"
+//            -> Term '>=' Term  => ">="
+//            -> Term '>' Term   => ">"
+//            -> Term '=' Term   => "="
+//            -> Term '<>' Term  => "<>"
+// Returns the number of tree nodes added to the stack
+int Parser::parseExpression(){
+    int tn = parseTerm();
+    switch (peekNextToken().getType()){
+
+        case TokenType::LEQ:
+            readExpectedToken(TokenType::LEQ);
+            tn += parseTerm();
+            buildTree(TreeNodeType::LEQ, tn);
+            return 1;
+            break;
+
+        case TokenType::LE:
+            readExpectedToken(TokenType::LE);
+            tn += parseTerm();
+            buildTree(TreeNodeType::LE, tn);
+            return 1;
+            break;
+
+        case TokenType::GEQ:
+            readExpectedToken(TokenType::GEQ);
+            tn += parseTerm();
+            buildTree(TreeNodeType::GEQ, tn);
+            return 1;
+            break;
+
+        case TokenType::GE:
+            readExpectedToken(TokenType::GE);
+            tn += parseTerm();
+            buildTree(TreeNodeType::GE, tn);
+            return 1;
+            break;
+
+        case TokenType::EQ:
+            readExpectedToken(TokenType::EQ);
+            tn += parseTerm();
+            buildTree(TreeNodeType::EQ, tn);
+            return 1;
+            break;
+
+        case TokenType::NEQ:
+            readExpectedToken(TokenType::NEQ);
+            tn += parseTerm();
+            buildTree(TreeNodeType::NEQ, tn);
+            return 1;
+            break;
+
+        default:
+            // Just the Term on its own
+            return tn;
+            break;
+    }
+
+}
+
+// Parses the productions
+// Term -> Factor
+//      -> Term '+' Factor  => "+"
+//      -> Term '-' Factor  => "-"
+//      -> Term 'or' Factor => "or"
+// Returns the number of tree nodes added to the stack
+int Parser::parseTerm(){
+    int tn = parseFactor();
+    std::unordered_set<TokenType> next_set = { TokenType::PLUS, TokenType::MINUS, TokenType::OR};
+    
+    while (next_set.count(peekNextToken().getType())){
+        switch (peekNextToken().getType()){
+
+            case TokenType::PLUS:
+                readExpectedToken(TokenType::PLUS);
+                int p = parseFactor();
+                buildTree(TreeNodeType::PLUS, tn+p);
+                break;
+
+            case TokenType::MINUS:
+                readExpectedToken(TokenType::MINUS);
+                int p = parseFactor();
+                buildTree(TreeNodeType::MINUS, tn+p);
+                break;    
+
+            case TokenType::OR:
+                readExpectedToken(TokenType::OR);
+                int p = parseFactor();
+                buildTree(TreeNodeType::OR, tn+p);
+                break; 
+        }
+    }
+    return 1;
+}
+
+// Parses the productions
+// Factor  -> Factor '*' Primary     => "*"
+//         -> Factor '/' Primary    => "/"
+//         -> Factor 'and' Primary  => "and"
+//         -> Factor 'mod' Primary  => "mod"
+//         -> Primary
+// Returns the number of tree nodes added to the stack
+int Parser::parseFactor(){
+    int tn = parsePrimary();
+    std::unordered_set<TokenType> next_set = { TokenType::PLUS, TokenType::MINUS, TokenType::OR};
+    
+    while (next_set.count(peekNextToken().getType())){
+        switch (peekNextToken().getType()){
+
+            case TokenType::MULT:
+                readExpectedToken(TokenType::MULT);
+                int p = parsePrimary();
+                buildTree(TreeNodeType::MULT, tn+p);
+                break;
+
+            case TokenType::DIVIDE:
+                readExpectedToken(TokenType::DIVIDE);
+                int p = parsePrimary();
+                buildTree(TreeNodeType::DIVIDE, tn+p);
+                break;    
+
+            case TokenType::AND:
+                readExpectedToken(TokenType::AND);
+                int p = parsePrimary();
+                buildTree(TreeNodeType::AND, tn+p);
+                break;     
+
+            case TokenType::MOD:
+                readExpectedToken(TokenType::MOD);
+                int p = parsePrimary();
+                buildTree(TreeNodeType::MOD, tn+p);
+                break; 
+        }
+    }
+    return 1;
+}
+
+// Parses the productions
+// Primary -> '-' Primary   => "-"
+//         -> '+' Primary
+//         -> 'not' Primary => "not"
+//         -> 'eof'         => "eof"
+//         -> Name
+//         -> '<integer>'
+//         -> '<char>'
+//         -> Name '(' Expression list ',' ')' => "call"
+//         -> '(' Expression ')'
+//         -> 'succ' '(' Expression ')' => "succ"
+//         -> 'pred' '(' Expression ')' => "pred"
+//         -> 'chr' '(' Expression ')'  => "chr"
+//         -> 'ord' '(' Expression ')'  => "ord"
+// Returns the number of tree nodes added to the stack
+int Parser::parsePrimary(){
+    switch (peekNextToken().getType()){
+
+        case TokenType::MINUS:
+            readExpectedToken(TokenType::MINUS);
+            int tn = parsePrimary();
+            buildTree(TreeNodeType::MINUS, tn);
+            return 1;
+            break;
+
+        case TokenType::PLUS:
+            readExpectedToken(TokenType::PLUS);
+            return parsePrimary();
+            break;
+
+        case TokenType::NOT:
+            readExpectedToken(TokenType::NOT);
+            int tn = parsePrimary();
+            buildTree(TreeNodeType::NOT, tn);
+            return 1;
+            break;
+
+        case TokenType::EOFT:
+            readExpectedToken(TokenType::EOFT);
+            buildTree(TreeNodeType::EOFT, 0);
+            return 1;
+            break;
+
+        case TokenType::IDENTIFER:
+            // All productions startng with Name
+            int tn = parseName();
+
+            if (peekNextToken().getType() == TokenType::OPENBRKT){
+                readExpectedToken(TokenType::OPENBRKT);
+                tn += parseExpression();
+                while (peekNextToken().getType() == TokenType::COMMA){
+                    readExpectedToken(TokenType::COMMA);
+                    tn += parseExpression();
+                }
+                readExpectedToken(TokenType::CLSBRKT);
+                buildTree(TreeNodeType::CALL, tn);
+                return 1;
+            }
+            else {
+                return tn;
+            }
+            break;
+
+        case TokenType::INTEGER:
+            readExpectedToken(TokenType::INTEGER);
+            return 1;
+            break;
+
+        case TokenType::CHAR:
+            readExpectedToken(TokenType::CHAR);
+            return 1;
+            break;
+
+        case TokenType::OPENBRKT:
+            readExpectedToken(TokenType::OPENBRKT);
+            int tn = parseExpression();
+            readExpectedToken(TokenType::CLSBRKT);
+            return tn;
+            break;
+
+        case TokenType::SUCC:
+            readExpectedToken(TokenType::SUCC);
+            readExpectedToken(TokenType::OPENBRKT);
+            int tn = parseExpression();
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::SUCC, tn);
+            return 1;
+            break;
+
+        case TokenType::PRED:
+            readExpectedToken(TokenType::PRED);
+            readExpectedToken(TokenType::OPENBRKT);
+            int tn = parseExpression();
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::PRED, tn);
+            return 1;
+            break;
+
+        case TokenType::CHR:
+            readExpectedToken(TokenType::CHR);
+            readExpectedToken(TokenType::OPENBRKT);
+            int tn = parseExpression();
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::CHR, tn);
+            return 1;
+            break;
+
+        case TokenType::ORD:
+            readExpectedToken(TokenType::ORD);
+            readExpectedToken(TokenType::OPENBRKT);
+            int tn = parseExpression();
+            readExpectedToken(TokenType::CLSBRKT);
+            buildTree(TreeNodeType::ORD, tn);
+            return 1;
+            break;
+
+        default:
+            throw std::runtime_error("Error occurred during parsing Primary");
+            break;
+    }
+}
+
+// Parses the production
+// Name -> '<identifier>'
+// Returns the number of tree nodes added to the stack
+int Parser::parseName(){
+    readExpectedToken(TokenType::IDENTIFER);
+    return 1;
+}
