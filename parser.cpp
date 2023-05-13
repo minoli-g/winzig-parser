@@ -1,9 +1,14 @@
 #include "parser.hpp"
 #include <stdexcept>
 
-Parser::Parser(std::vector<Token> tokens){
-    //TODO - Strip comment tokens from the list
-    this->tokens = tokens;
+Parser::Parser(std::vector<Token> lexer_tokens){
+    this->tokens = { };
+    // Strip comment tokens from the list
+    for (Token t: lexer_tokens){
+        if (t.getType() != TokenType::COMMENT_1 || t.getType() != TokenType::COMMENT_2){
+            this->tokens.push_back(t);
+        }
+    }
     this->position = this->tokens.begin();
     this->stack = { };
 }
