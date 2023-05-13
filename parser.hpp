@@ -21,32 +21,36 @@ class Parser {
 
         void buildTree(TreeNodeType type, int num_children);
 
-        void parseWinzig();
-        void parseConsts();
-        void parseConst();
-        void parseConstValue();
-        void parseTypes();
-        void parseType();
-        void parseLitList();
-        void parseSubProgs();
-        void parseFcn();
-        void parseParams();
-        void parseDclns();
-        void parseDcln();
-        void parseBody();
-        void parseStatement();
-        void parseOutExp();
-        void parseStringNode();
-        void parseCaseclauses();
-        void parseCaseclause();
-        void parseCaseExpression();
-        void parseOtherwiseClause();
-        void parseAssignment();
-        void parseForStat();
-        void parseForExp();
-        void parseExpression();
-        void parseTerm();
-        void parseFactor();
-        void parsePrimary();
-        void parseName();
+        // Functions which parse different types of nonterminals and return the number of tree nodes pushed onto the stack
+        // Most often, the return value is 1
+        // But a few nonterminals (CaseClauses, OtherwiseClause etc) do not always adhere to this
+
+        int parseWinzig();
+        int parseConsts();
+        int parseConst();
+        int parseConstValue();
+        int parseTypes();
+        int parseType();
+        int parseLitList();
+        int parseSubProgs();
+        int parseFcn();
+        int parseParams();
+        int parseDclns();
+        int parseDcln();
+        int parseBody();
+        int parseStatement();
+        int parseOutExp();
+        int parseStringNode();
+        int parseCaseclauses();
+        int parseCaseclause();
+        int parseCaseExpression();
+        int parseOtherwiseClause();
+        int parseAssignment();
+        int parseForStat();
+        int parseForExp();
+        int parseExpression();
+        int parseTerm();
+        int parseFactor();
+        int parsePrimary();
+        int parseName();
 };
