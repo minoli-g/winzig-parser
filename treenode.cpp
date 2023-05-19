@@ -73,7 +73,7 @@ void TreeNode::addChild(TreeNode* child){
 std::string TreeNode::pprintTree(int depth){
     std::string printStr = "";
     for (int i=0; i<depth; ++i){
-        printStr.append(".");
+        printStr.append(". ");
     }
     int n = this->children.size();
 
