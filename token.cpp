@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "iostream"
 
-std::unordered_map <TokenType, std::string> Token::predefined_tokens = {
+std::map <TokenType, std::string> Token::predefined_tokens = {
     {TokenType::PROGRAM, "program"}, 
     {TokenType::VAR, "var"},
     {TokenType::CONST, "const"},

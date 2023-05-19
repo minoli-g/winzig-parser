@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 #include <string>
-#include <unordered_map>
+#include <map>
 
 enum class TokenType {
     // define all the types of tokens that will be used.
@@ -21,7 +21,7 @@ class Token {
         std::string value;
 
     public:
-        static std::unordered_map<TokenType, std::string> predefined_tokens;
+        static std::map<TokenType, std::string> predefined_tokens;
 
         Token(TokenType type);
         Token(TokenType type, std::string value);
