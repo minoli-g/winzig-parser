@@ -41,19 +41,19 @@ void Parser::readToken(){
             stack.push(tn);
             break;
 
-        case INTEGER:
+        case TokenType::INTEGER:
             tn = new TreeNode(TreeNodeType::INTEGER);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
 
-        case CHAR:
+        case TokenType::CHAR:
             tn = new TreeNode(TreeNodeType::CHAR);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
 
-        case STRING:
+        case TokenType::STRING:
             tn = new TreeNode(TreeNodeType::STRING);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
@@ -70,10 +70,8 @@ void Parser::readToken(){
 void Parser::readExpectedToken(TokenType type){
     if (peekNextToken().getType() != type){
         throw std::runtime_error(
-            "Expected token of type " + 
-            Token::typeToString(type) + 
-            ", got token of type " +
-            Token::typeToString(peekNextToken().getType())
+            "Expected token of type " + std::to_string((int) type) +
+            ", got token of type " + std::to_string((int) peekNextToken().getType())
         );
     }
     else {
@@ -102,7 +100,7 @@ int Parser::parseWinzig(){
     int tn = 0;
     readExpectedToken(TokenType::PROGRAM);
     tn += parseName();
-    readExpectedToken(TokenType::SEMICOLON);
+    readExpectedToken(TokenType::COLON);
     tn += parseConsts();
     tn += parseTypes();
     tn += parseDclns();
@@ -247,7 +245,7 @@ int Parser::parseFcn(){
     readExpectedToken(TokenType::OPENBRKT);
     tn += parseParams();
     readExpectedToken(TokenType::CLSBRKT);
-    readExpectedToken(TokenType::SEMICOLON);
+    readExpectedToken(TokenType::COLON);
     tn += parseName();
     readExpectedToken(TokenType::SEMICOLON);
     tn += parseConsts();
@@ -308,7 +306,7 @@ int Parser::parseDcln(){
         readExpectedToken(TokenType::COMMA);
         tn += parseName();
     }
-    readExpectedToken(TokenType::SEMICOLON);
+    readExpectedToken(TokenType::COLON);
     tn += parseName();
     buildTree(TreeNodeType::VAR, tn);
     return 1;
