@@ -82,9 +82,16 @@ void Parser::readExpectedToken(TokenType type){
 void Parser::buildTree(TreeNodeType type, int num_children){
 
     TreeNode* tn = new TreeNode(type);
+    std::stack<TreeNode*> temp = { };
+
     for (int i=0; i<num_children; ++i){
-        tn->addChild(stack.top());
+        temp.push(stack.top());
         stack.pop();
+    }
+
+    for (int i=0; i<num_children; ++i){
+        tn->addChild(temp.top());
+        temp.pop();
     }
     stack.push(tn);
 }
