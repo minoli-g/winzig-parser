@@ -727,7 +727,7 @@ int Parser::parseTerm(){
 // Returns the number of tree nodes added to the stack
 int Parser::parseFactor(){
     int tn = parsePrimary();
-    std::unordered_set<TokenType> next_set = { TokenType::PLUS, TokenType::MINUS, TokenType::OR};
+    std::unordered_set<TokenType> next_set = { TokenType::MULT, TokenType::DIVIDE, TokenType::AND, TokenType::MOD};
     
     while (next_set.count(peekNextToken().getType())){
         int p = 0;
