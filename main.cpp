@@ -23,11 +23,13 @@ int main(int argc, char *argv[]){
     }
     else{
         std::cout << "Error: Argument format incorrect. \n";
+        exit(1);
     }
 
     file.open(input_file_path);
     if (!file){
         std::cout << "Error: Could not read file. \n";
+        exit(1);
     }
 
     // Read the content of the file
@@ -41,24 +43,37 @@ int main(int argc, char *argv[]){
     try{
         lexer.parse();   
         token_sequence = lexer.getTokenSequence();
-        std::cout << "Lexical analysis complete \n";
-
-        std::ofstream token_seq_file("token_seq.txt");
-        for (Token t: token_sequence){
-            token_seq_file << static_cast<std::underlying_type<TokenType>::type>(t.getType()) << " : " <<t.getValue() << "\n";
-        } 
-        token_seq_file.close(); 
+        std::cout << "Lexical analysis complete \n"; 
     }
     catch (const std::runtime_error& err){
         std::cout << err.what() << "\n"; 
-        return 0;
+        exit(1);
+    }
+    
+    // Save lexer output tokens for debugging purposes
+    std::ofstream token_seq_file("token_seq.txt");
+    for (Token t: token_sequence){
+        token_seq_file << static_cast<std::underlying_type<TokenType>::type>(t.getType()) << " : " <<t.getValue() << "\n";
+    } 
+    token_seq_file.close();
+
+    // Parse the tokens into an AST
+    Parser parser = Parser(token_sequence);
+
+    try{
+        parser.parseWinzig();
+        TreeNode* ast = parser.returnFinalTree();
+        std::cout << ast->pprintTree(0);
+
+        // Save parser output to file
+        std::ofstream output_file("ast.txt");
+        output_file << ast->pprintTree(0);
+        output_file.close();
+    }
+    catch (const std::runtime_error& err){
+        std::cout << err.what() << "\n"; 
+        exit(1); 
     }
 
-    Parser parser = Parser(token_sequence);
-    parser.parseWinzig();
-    TreeNode* ast = parser.returnFinalTree();
-    std::cout << ast->pprintTree(0);
-
-    
-    return 0;
+    exit(0);
 }
