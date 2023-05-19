@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
 
-enum TreeNodeType {
+enum class TreeNodeType {
     IDENTIFER, INTEGER, CHAR, STRING,
     PROGRAM, CONSTS, CONST, TYPES, TYPE, LIT, SUBPROGS, FCN, PARAMS, DCLNS,
     VAR, BLOCK, OUTPUT, IF, WHILE, REPEAT, FOR, LOOP, CASE, READ, EXIT, RETURN,
@@ -22,5 +22,5 @@ class TreeNode {
         TreeNode(TreeNodeType type);
         void addChild(TreeNode* child);
 
-        std::string pprintTree();
+        std::string pprintTree(int depth);
 };

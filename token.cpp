@@ -5,58 +5,58 @@
 #include "iostream"
 
 std::unordered_map <TokenType, std::string> Token::predefined_tokens = {
-    {PROGRAM, "program"}, 
-    {VAR, "var"},
-    {CONST, "const"},
-    {TYPE, "type"}, 
-    {FUNCTION, "function"}, 
-    {RETURN, "return"}, 
-    {BEGIN, "begin"}, 
-    {END, "end"}, 
-    {SWAP, ":=:"}, 
-    {ASSIGN, ":="}, 
-    {OUTPUT, "output"}, 
-    {IF, "if"}, 
-    {THEN, "then"}, 
-    {ELSE, "else"}, 
-    {WHILE, "while"}, 
-    {DO, "do"}, 
-    {CASE, "case"}, 
-    {OF, "of"}, 
-    {DOTS, ".."}, 
-    {OTHERWISE, "otherwise"}, 
-    {REPEAT, "repeat"}, 
-    {FOR, "for"}, 
-    {UNTIL, "until"}, 
-    {LOOP, "loop"}, 
-    {POOL, "pool"}, 
-    {EXIT, "exit"}, 
-    {LEQ, "<="}, 
-    {NEQ, "<>"}, 
-    {LE, "<"}, 
-    {GEQ, ">="}, 
-    {GE, ">"}, 
-    {EQ, "="}, 
-    {MOD, "mod"}, 
-    {AND, "and"}, 
-    {OR, "or"}, 
-    {NOT, "not"}, 
-    {READ, "read"}, 
-    {SUCC, "succ"}, 
-    {PRED, "pred"}, 
-    {CHR, "chr"}, 
-    {ORD, "ord"}, 
-    {EOFT, "eof"}, 
-    {COLON, ":"}, 
-    {SEMICOLON, ";"}, 
-    {PERIOD, "."}, 
-    {COMMA, ","}, 
-    {OPENBRKT, "("}, 
-    {CLSBRKT, ")"}, 
-    {PLUS, "+"}, 
-    {MINUS, "-"}, 
-    {MULT, "*"}, 
-    {DIVIDE, "/"}
+    {TokenType::PROGRAM, "program"}, 
+    {TokenType::VAR, "var"},
+    {TokenType::CONST, "const"},
+    {TokenType::TYPE, "type"}, 
+    {TokenType::FUNCTION, "function"}, 
+    {TokenType::RETURN, "return"}, 
+    {TokenType::BEGIN, "begin"}, 
+    {TokenType::END, "end"}, 
+    {TokenType::SWAP, ":=:"}, 
+    {TokenType::ASSIGN, ":="}, 
+    {TokenType::OUTPUT, "output"}, 
+    {TokenType::IF, "if"}, 
+    {TokenType::THEN, "then"}, 
+    {TokenType::ELSE, "else"}, 
+    {TokenType::WHILE, "while"}, 
+    {TokenType::DO, "do"}, 
+    {TokenType::CASE, "case"}, 
+    {TokenType::OF, "of"}, 
+    {TokenType::DOTS, ".."}, 
+    {TokenType::OTHERWISE, "otherwise"}, 
+    {TokenType::REPEAT, "repeat"}, 
+    {TokenType::FOR, "for"}, 
+    {TokenType::UNTIL, "until"}, 
+    {TokenType::LOOP, "loop"}, 
+    {TokenType::POOL, "pool"}, 
+    {TokenType::EXIT, "exit"}, 
+    {TokenType::LEQ, "<="}, 
+    {TokenType::NEQ, "<>"}, 
+    {TokenType::LE, "<"}, 
+    {TokenType::GEQ, ">="}, 
+    {TokenType::GE, ">"}, 
+    {TokenType::EQ, "="}, 
+    {TokenType::MOD, "mod"}, 
+    {TokenType::AND, "and"}, 
+    {TokenType::OR, "or"}, 
+    {TokenType::NOT, "not"}, 
+    {TokenType::READ, "read"}, 
+    {TokenType::SUCC, "succ"}, 
+    {TokenType::PRED, "pred"}, 
+    {TokenType::CHR, "chr"}, 
+    {TokenType::ORD, "ord"}, 
+    {TokenType::EOFT, "eof"}, 
+    {TokenType::COLON, ":"}, 
+    {TokenType::SEMICOLON, ";"}, 
+    {TokenType::PERIOD, "."}, 
+    {TokenType::COMMA, ","}, 
+    {TokenType::OPENBRKT, "("}, 
+    {TokenType::CLSBRKT, ")"}, 
+    {TokenType::PLUS, "+"}, 
+    {TokenType::MINUS, "-"}, 
+    {TokenType::MULT, "*"}, 
+    {TokenType::DIVIDE, "/"}
 };
 
 Token::Token(TokenType type, std::string value) {
@@ -65,7 +65,13 @@ Token::Token(TokenType type, std::string value) {
 }
 
 Token::Token(TokenType type){
-    std::unordered_set<TokenType> not_predefined = {IDENTIFER, INTEGER, CHAR, COMMENT_1, COMMENT_2};
+    std::unordered_set<TokenType> not_predefined = {
+        TokenType::IDENTIFER, 
+        TokenType::INTEGER, 
+        TokenType::CHAR, 
+        TokenType::COMMENT_1, 
+        TokenType::COMMENT_2
+    };
     if (not_predefined.count(type)){
         throw std::runtime_error("String argument required to construct non-predefined token");
     }
@@ -91,22 +97,22 @@ std::string Token::getValue(){
 TokenType Token::identifyNonPredefinedTokenType(char c){
     
     if (isalpha(c) || c=='_') {
-        return IDENTIFER;
+        return TokenType::IDENTIFER;
     }
     if (isdigit(c)) {
-        return INTEGER;
+        return TokenType::INTEGER;
     }
     if (c=='\''){
-        return CHAR;
+        return TokenType::CHAR;
     }
     if (c=='"'){
-        return STRING;
+        return TokenType::STRING;
     }
     if (c=='#'){
-        return COMMENT_1;
+        return TokenType::COMMENT_1;
     }
     if (c=='{'){
-        return COMMENT_2;
+        return TokenType::COMMENT_2;
     }
     throw std::runtime_error("Unexpected character ("+
                             std::string(1,c) + ") encountered: token could not be identified.\n");

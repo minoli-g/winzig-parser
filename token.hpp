@@ -6,7 +6,7 @@
 
 #define str(x) #x
 
-enum TokenType {
+enum class TokenType {
     // define all the types of tokens that will be used.
     // Whitespace and Newline are not included as they will be discarded during the lexical analysis
     // Begin of block { is not included as it only marks comments, which will be discarded
