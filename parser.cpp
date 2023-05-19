@@ -32,28 +32,29 @@ Token Parser::peekNextToken(){
 void Parser::readToken(){
 
     Token t = *position;
+    TreeNode* tn;
 
     switch (t.getType()){
         case TokenType::IDENTIFER:
-            TreeNode* tn = new TreeNode(TreeNodeType::IDENTIFER);
+            tn = new TreeNode(TreeNodeType::IDENTIFER);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
 
         case INTEGER:
-            TreeNode* tn = new TreeNode(TreeNodeType::INTEGER);
+            tn = new TreeNode(TreeNodeType::INTEGER);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
 
         case CHAR:
-            TreeNode* tn = new TreeNode(TreeNodeType::CHAR);
+            tn = new TreeNode(TreeNodeType::CHAR);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
 
         case STRING:
-            TreeNode* tn = new TreeNode(TreeNodeType::STRING);
+            tn = new TreeNode(TreeNodeType::STRING);
             tn->addChild(new TreeNode(t.getValue()));
             stack.push(tn);
             break;
@@ -87,7 +88,11 @@ void Parser::buildTree(TreeNodeType type, int num_children){
         tn->addChild(stack.top());
         stack.pop();
     }
+    stack.push(tn);
+}
 
+TreeNode* Parser::returnFinalTree(){
+    return stack.top();
 }
 
 // Parses the production
@@ -342,10 +347,11 @@ int Parser::parseBody(){
 //           ->                              => "<null>"
 // Returns the number of tree nodes pushed to stack
 int Parser::parseStatement(){
+
+    int tn = 0;
     switch (peekNextToken().getType()){
 
         case TokenType::OUTPUT:
-            int tn = 0;
             readExpectedToken(TokenType::OUTPUT);
             readExpectedToken(TokenType::OPENBRKT);
             tn += parseOutExp();
@@ -357,10 +363,8 @@ int Parser::parseStatement(){
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::OUTPUT, tn);
             return 1;
-            break;
 
         case TokenType::IF:
-            int tn = 0;
             readExpectedToken(TokenType::IF);
             tn += parseExpression();
             readExpectedToken(TokenType::THEN);
@@ -372,20 +376,16 @@ int Parser::parseStatement(){
             }
             buildTree(TreeNodeType::IF, tn);
             return 1;
-            break;
 
         case TokenType::WHILE:
-            int tn = 0;
             readExpectedToken(TokenType::WHILE);
             tn += parseExpression();
             readExpectedToken(TokenType::DO);
             tn += parseStatement();
             buildTree(TreeNodeType::WHILE, tn);
             return 1;
-            break;
         
         case TokenType::REPEAT:
-            int tn = 0;
             readExpectedToken(TokenType::REPEAT);
             tn += parseStatement();
             
@@ -396,10 +396,9 @@ int Parser::parseStatement(){
             readExpectedToken(TokenType::UNTIL);
             tn += parseExpression();
             buildTree(TreeNodeType::REPEAT, tn);
-            break;
+            return 1;
 
         case TokenType::FOR:
-            int tn = 0;
             readExpectedToken(TokenType::FOR);
             readExpectedToken(TokenType::OPENBRKT);
             tn += parseForStat();
@@ -411,10 +410,8 @@ int Parser::parseStatement(){
             tn += parseStatement();
             buildTree(TreeNodeType::FOR, tn);
             return 1;
-            break;
 
         case TokenType::LOOP:
-            int tn = 0;
             readExpectedToken(TokenType::LOOP);
             tn += parseStatement();
             
@@ -425,10 +422,8 @@ int Parser::parseStatement(){
             readExpectedToken(TokenType::POOL);
             buildTree(TreeNodeType::LOOP, tn);
             return 1;
-            break;
 
         case TokenType::CASE:
-            int tn = 0;
             readExpectedToken(TokenType::CASE);
             tn += parseExpression();
             readExpectedToken(TokenType::OF);
@@ -437,10 +432,8 @@ int Parser::parseStatement(){
             readExpectedToken(TokenType::END);
             buildTree(TreeNodeType::CASE, tn);
             return 1;
-            break;
 
         case TokenType::READ:
-            int tn = 0;
             readExpectedToken(TokenType::READ);
             readExpectedToken(TokenType::OPENBRKT);
             tn += parseName();
@@ -452,35 +445,29 @@ int Parser::parseStatement(){
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::READ, tn);
             return 1;
-            break;
 
         case TokenType::EXIT:
             readExpectedToken(TokenType::EXIT);
             buildTree(TreeNodeType::EXIT, 0);
             return 1;
-            break;
 
         case TokenType::RETURN:
             readExpectedToken(TokenType::RETURN);
-            int tn = parseExpression();
+            tn += parseExpression();
             buildTree(TreeNodeType::RETURN, tn);
             return 1;
-            break;
 
         case TokenType::IDENTIFER:
             // All Assignment productions begin with this token
             return parseAssignment();
-            break;
 
         case TokenType::BEGIN:
             // All Body productions begin with this token
             return parseBody();
-            break;
 
         default:
             buildTree(TreeNodeType::NNULL, 0);
             return 1;
-            break;
     }
 }
 
@@ -704,25 +691,30 @@ int Parser::parseTerm(){
     std::unordered_set<TokenType> next_set = { TokenType::PLUS, TokenType::MINUS, TokenType::OR};
     
     while (next_set.count(peekNextToken().getType())){
+        int p = 0;
         switch (peekNextToken().getType()){
 
             case TokenType::PLUS:
                 readExpectedToken(TokenType::PLUS);
-                int p = parseFactor();
+                p = parseFactor();
                 buildTree(TreeNodeType::PLUS, tn+p);
                 break;
 
             case TokenType::MINUS:
                 readExpectedToken(TokenType::MINUS);
-                int p = parseFactor();
+                p = parseFactor();
                 buildTree(TreeNodeType::MINUS, tn+p);
                 break;    
 
             case TokenType::OR:
                 readExpectedToken(TokenType::OR);
-                int p = parseFactor();
+                p = parseFactor();
                 buildTree(TreeNodeType::OR, tn+p);
                 break; 
+
+            default:
+                // This shouldn't happen
+                throw std::runtime_error("Error occurred when parsing Term");
         }
     }
     return 1;
@@ -740,31 +732,36 @@ int Parser::parseFactor(){
     std::unordered_set<TokenType> next_set = { TokenType::PLUS, TokenType::MINUS, TokenType::OR};
     
     while (next_set.count(peekNextToken().getType())){
+        int p = 0;
         switch (peekNextToken().getType()){
 
             case TokenType::MULT:
                 readExpectedToken(TokenType::MULT);
-                int p = parsePrimary();
+                p = parsePrimary();
                 buildTree(TreeNodeType::MULT, tn+p);
                 break;
 
             case TokenType::DIVIDE:
                 readExpectedToken(TokenType::DIVIDE);
-                int p = parsePrimary();
+                p = parsePrimary();
                 buildTree(TreeNodeType::DIVIDE, tn+p);
                 break;    
 
             case TokenType::AND:
                 readExpectedToken(TokenType::AND);
-                int p = parsePrimary();
+                p = parsePrimary();
                 buildTree(TreeNodeType::AND, tn+p);
                 break;     
 
             case TokenType::MOD:
                 readExpectedToken(TokenType::MOD);
-                int p = parsePrimary();
+                p = parsePrimary();
                 buildTree(TreeNodeType::MOD, tn+p);
                 break; 
+
+            default:
+                // This shouldn't happen
+                throw std::runtime_error("Error occurred when parsing Factor");
         }
     }
     return 1;
@@ -786,36 +783,34 @@ int Parser::parseFactor(){
 //         -> 'ord' '(' Expression ')'  => "ord"
 // Returns the number of tree nodes added to the stack
 int Parser::parsePrimary(){
+    int tn = 0;
+
     switch (peekNextToken().getType()){
 
         case TokenType::MINUS:
             readExpectedToken(TokenType::MINUS);
-            int tn = parsePrimary();
+            tn += parsePrimary();
             buildTree(TreeNodeType::MINUS, tn);
             return 1;
-            break;
 
         case TokenType::PLUS:
             readExpectedToken(TokenType::PLUS);
             return parsePrimary();
-            break;
 
         case TokenType::NOT:
             readExpectedToken(TokenType::NOT);
-            int tn = parsePrimary();
+            tn += parsePrimary();
             buildTree(TreeNodeType::NOT, tn);
             return 1;
-            break;
 
         case TokenType::EOFT:
             readExpectedToken(TokenType::EOFT);
             buildTree(TreeNodeType::EOFT, 0);
             return 1;
-            break;
 
         case TokenType::IDENTIFER:
             // All productions startng with Name
-            int tn = parseName();
+            tn += parseName();
 
             if (peekNextToken().getType() == TokenType::OPENBRKT){
                 readExpectedToken(TokenType::OPENBRKT);
@@ -831,64 +826,55 @@ int Parser::parsePrimary(){
             else {
                 return tn;
             }
-            break;
 
         case TokenType::INTEGER:
             readExpectedToken(TokenType::INTEGER);
             return 1;
-            break;
 
         case TokenType::CHAR:
             readExpectedToken(TokenType::CHAR);
             return 1;
-            break;
 
         case TokenType::OPENBRKT:
             readExpectedToken(TokenType::OPENBRKT);
-            int tn = parseExpression();
+            tn += parseExpression();
             readExpectedToken(TokenType::CLSBRKT);
             return tn;
-            break;
 
         case TokenType::SUCC:
             readExpectedToken(TokenType::SUCC);
             readExpectedToken(TokenType::OPENBRKT);
-            int tn = parseExpression();
+            tn += parseExpression();
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::SUCC, tn);
             return 1;
-            break;
 
         case TokenType::PRED:
             readExpectedToken(TokenType::PRED);
             readExpectedToken(TokenType::OPENBRKT);
-            int tn = parseExpression();
+            tn += parseExpression();
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::PRED, tn);
             return 1;
-            break;
 
         case TokenType::CHR:
             readExpectedToken(TokenType::CHR);
             readExpectedToken(TokenType::OPENBRKT);
-            int tn = parseExpression();
+            tn += parseExpression();
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::CHR, tn);
             return 1;
-            break;
 
         case TokenType::ORD:
             readExpectedToken(TokenType::ORD);
             readExpectedToken(TokenType::OPENBRKT);
-            int tn = parseExpression();
+            tn += parseExpression();
             readExpectedToken(TokenType::CLSBRKT);
             buildTree(TreeNodeType::ORD, tn);
             return 1;
-            break;
 
         default:
             throw std::runtime_error("Error occurred during parsing Primary");
-            break;
     }
 }
 

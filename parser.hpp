@@ -20,6 +20,7 @@ class Parser {
         void readExpectedToken(TokenType type);
 
         void buildTree(TreeNodeType type, int num_children);
+        TreeNode* returnFinalTree();
 
         // Functions which parse different types of nonterminals and return the number of tree nodes pushed onto the stack
         // Most often, the return value is 1
