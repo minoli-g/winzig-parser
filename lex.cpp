@@ -24,21 +24,21 @@ void Lexer::parse(){
         if (! consumePredefinedTokenIfPresent() ){
 
             switch(Token::identifyNonPredefinedTokenType(*position)){
-                case IDENTIFER:
+                case TokenType::IDENTIFER:
                     consumeIdentifier();
                     break;
-                case INTEGER:
+                case TokenType::INTEGER:
                     consumeInteger();
                     break;
-                case CHAR:
+                case TokenType::CHAR:
                     consumeChar();
                     break;
-                case STRING:
+                case TokenType::STRING:
                     consumeString();
-                case COMMENT_1:
+                case TokenType::COMMENT_1:
                     consumeCommentOne();
                     break;
-                case COMMENT_2:
+                case TokenType::COMMENT_2:
                     consumeCommentTwo();
                     break;
                 default:
@@ -83,7 +83,7 @@ void Lexer::consumeIdentifier(){
     while (positionValid() && (isalnum(*position) || *position=='_' )){
         position++;
     }
-    tokens.push_back( Token(IDENTIFER, std::string(temp, position)) );
+    tokens.push_back( Token(TokenType::IDENTIFER, std::string(temp, position)) );
 }
 
 void Lexer::consumeInteger(){
@@ -94,7 +94,7 @@ void Lexer::consumeInteger(){
     while (positionValid() && isdigit(*position) ){
         position++;
     }
-    tokens.push_back( Token(INTEGER, std::string(temp, position)) );
+    tokens.push_back( Token(TokenType::INTEGER, std::string(temp, position)) );
 }
 
 void Lexer::consumeChar(){
@@ -114,7 +114,7 @@ void Lexer::consumeChar(){
     if (!positionValid()){ 
         throw std::runtime_error("EOF reached while parsing char \n");
     }
-    tokens.push_back( Token(CHAR, std::string(temp+1, temp+2)) );
+    tokens.push_back( Token(TokenType::CHAR, std::string(temp+1, temp+2)) );
     position ++;
 }
 
@@ -130,7 +130,7 @@ void Lexer::consumeString(){
         throw std::runtime_error("EOF reached while parsing string \n");
     }
     if (*position == '"'){
-        tokens.push_back( Token(STRING, std::string(temp+1, position)) );
+        tokens.push_back( Token(TokenType::STRING, std::string(temp+1, position)) );
         position++;
     }
 }
@@ -144,7 +144,7 @@ void Lexer::consumeCommentOne(){
         position++;
     }
     // Whether it's now at EOF or a newline, the comment is complete
-    tokens.push_back( Token(COMMENT_1, std::string(temp, position)) );
+    tokens.push_back( Token(TokenType::COMMENT_1, std::string(temp, position)) );
 }
 
 void Lexer::consumeCommentTwo(){
@@ -159,7 +159,7 @@ void Lexer::consumeCommentTwo(){
         throw std::runtime_error("EOF reached while parsing multiline comment \n");
     }
     if (*position == '}'){
-        tokens.push_back( Token(COMMENT_2, std::string(temp, position+1)) );
+        tokens.push_back( Token(TokenType::COMMENT_2, std::string(temp, position+1)) );
         position++;
     }
 }
