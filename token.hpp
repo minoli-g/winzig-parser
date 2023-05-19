@@ -4,8 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-#define str(x) #x
-
 enum class TokenType {
     // define all the types of tokens that will be used.
     // Whitespace and Newline are not included as they will be discarded during the lexical analysis
@@ -24,8 +22,6 @@ class Token {
 
     public:
         static std::unordered_map<TokenType, std::string> predefined_tokens;
-
-        static std::string typeToString(TokenType type);
 
         Token(TokenType type);
         Token(TokenType type, std::string value);

@@ -85,11 +85,6 @@ TokenType Token::getType(){
     return type;
 }
 
-std::string Token::typeToString(TokenType type){
-    std::string x = str(type);
-    return x;
-}
-
 std::string Token::getValue(){
     return value;
 }
