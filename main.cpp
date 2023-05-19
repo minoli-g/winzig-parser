@@ -5,6 +5,7 @@
 
 #include "lex.hpp"
 #include "token.hpp"
+#include "parser.hpp"
 
 int main(int argc, char *argv[]){
 
@@ -35,17 +36,29 @@ int main(int argc, char *argv[]){
 
     // Convert the content into tokens
     Lexer lexer (content);
+    std::vector<Token> token_sequence;
+
     try{
-        lexer.parse();     
+        lexer.parse();   
+        token_sequence = lexer.getTokenSequence();
+        std::cout << "Lexical analysis complete \n";
+
+        std::ofstream token_seq_file("token_seq.txt");
+        for (Token t: token_sequence){
+            token_seq_file << static_cast<std::underlying_type<TokenType>::type>(t.getType()) << " : " <<t.getValue() << "\n";
+        } 
+        token_seq_file.close(); 
     }
     catch (const std::runtime_error& err){
         std::cout << err.what() << "\n"; 
+        return 0;
     }
 
-    std::vector<Token> token_sequence = lexer.getTokenSequence();
-    for (Token t: token_sequence){
-        std::cout << t.getType() << " : " <<t.getValue() << "\n";
-    }
+    Parser parser = Parser(token_sequence);
+    parser.parseWinzig();
+    TreeNode* ast = parser.returnFinalTree();
+    std::cout << ast->pprintTree(0);
 
+    
     return 0;
 }
