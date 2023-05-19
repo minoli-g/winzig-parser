@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 enum class TreeNodeType {
     IDENTIFER, INTEGER, CHAR, STRING,
@@ -13,6 +14,8 @@ enum class TreeNodeType {
 class TreeNode {
 
     private:
+        static std::unordered_map<TreeNodeType, std::string> type_string_map;
+
         TreeNodeType type;
         std::string value;
         std::vector<TreeNode*> children;
