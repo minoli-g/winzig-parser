@@ -1,12 +1,13 @@
 #include "parser.hpp"
 #include <stdexcept>
 #include <unordered_set>
+#include <iostream>
 
 Parser::Parser(std::vector<Token> lexer_tokens){
     this->tokens = { };
     // Strip comment tokens from the list
     for (Token t: lexer_tokens){
-        if (t.getType() != TokenType::COMMENT_1 || t.getType() != TokenType::COMMENT_2){
+        if (t.getType() != TokenType::COMMENT_1 && t.getType() != TokenType::COMMENT_2){
             this->tokens.push_back(t);
         }
     }
@@ -22,8 +23,8 @@ bool Parser::positionValid(){
 }
 
 Token Parser::peekNextToken(){
-    if (position+1 < tokens.end()){
-        return *(position+1);
+    if (position < tokens.end()){
+        return *(position);
     }
     throw std::runtime_error("Attempted to peek ahead at EOF");
 }
@@ -314,7 +315,10 @@ int Parser::parseDcln(){
         tn += parseName();
     }
     readExpectedToken(TokenType::COLON);
+    std::cout << "Type of current token in Dcln before Name: " << (int) (*position).getType() << "\n\n";
     tn += parseName();
+    std::cout << "Current stack top token after parsing Name: "
+                << stack.top()->pprintTree(0) << "\n\n\n";
     buildTree(TreeNodeType::VAR, tn);
     return 1;
 }
