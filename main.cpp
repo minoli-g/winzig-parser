@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[]){
 
-    std::cout << "Program started \n";
+    //std::cout << "Program started \n";
     
     std::string input_file_path; 
     std::ifstream file; 
