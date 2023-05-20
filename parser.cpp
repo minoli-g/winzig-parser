@@ -492,7 +492,7 @@ int Parser::parseOutExp(){
     }
     else {
         int tn = parseExpression();
-        buildTree(TreeNodeType::INTEGER, tn);
+        buildTree(TreeNodeType::TN_INTEGER, tn);
         return 1;
     }
 }

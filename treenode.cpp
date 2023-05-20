@@ -29,6 +29,7 @@ std::unordered_map<TreeNodeType, std::string> TreeNode::type_string_map = {
     {TreeNodeType::RETURN, "return"},
     {TreeNodeType::NNULL, "<null>"},
     {TreeNodeType::CASECLAUSE, "case_clause"},
+    {TreeNodeType::TN_INTEGER, "integer"},
     {TreeNodeType::DOTS, ".."},
     {TreeNodeType::OTHERWISE, "otherwise"},
     {TreeNodeType::ASSIGN, "assign"},
