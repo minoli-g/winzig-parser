@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     try{
         lexer.parse();   
         token_sequence = lexer.getTokenSequence();
-        std::cout << "Lexical analysis complete \n"; 
+        //std::cout << "Lexical analysis complete \n"; 
     }
     catch (const std::runtime_error& err){
         std::cout << err.what() << "\n"; 
@@ -51,11 +51,11 @@ int main(int argc, char *argv[]){
     }
     
     // Save lexer output tokens for debugging purposes
-    std::ofstream token_seq_file("token_seq.txt");
-    for (Token t: token_sequence){
-        token_seq_file << static_cast<std::underlying_type<TokenType>::type>(t.getType()) << " : " <<t.getValue() << "\n";
-    } 
-    token_seq_file.close();
+    // std::ofstream token_seq_file("token_seq.txt");
+    // for (Token t: token_sequence){
+    //     token_seq_file << static_cast<std::underlying_type<TokenType>::type>(t.getType()) << " : " <<t.getValue() << "\n";
+    // } 
+    // token_seq_file.close();
 
     // Parse the tokens into an AST
     Parser parser = Parser(token_sequence);
@@ -66,9 +66,10 @@ int main(int argc, char *argv[]){
         std::cout << ast->pprintTree(0);
 
         // Save parser output to file
-        std::ofstream output_file("ast.txt");
-        output_file << ast->pprintTree(0);
-        output_file.close();
+        // Removed as this happens automatically on running command
+        // std::ofstream output_file("ast.txt");
+        // output_file << ast->pprintTree(0);
+        // output_file.close();
     }
     catch (const std::runtime_error& err){
         std::cout << err.what() << "\n"; 
