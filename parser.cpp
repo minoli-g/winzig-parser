@@ -315,10 +315,7 @@ int Parser::parseDcln(){
         tn += parseName();
     }
     readExpectedToken(TokenType::COLON);
-    std::cout << "Type of current token in Dcln before Name: " << (int) (*position).getType() << "\n\n";
     tn += parseName();
-    std::cout << "Current stack top token after parsing Name: "
-                << stack.top()->pprintTree(0) << "\n\n\n";
     buildTree(TreeNodeType::VAR, tn);
     return 1;
 }
