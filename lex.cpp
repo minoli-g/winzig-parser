@@ -114,7 +114,7 @@ void Lexer::consumeChar(){
     if (!positionValid()){ 
         throw std::runtime_error("EOF reached while parsing char \n");
     }
-    tokens.push_back( Token(TokenType::CHAR, std::string(temp+1, temp+2)) );
+    tokens.push_back( Token(TokenType::CHAR, std::string(temp, temp+3)) );
     position ++;
 }
 
