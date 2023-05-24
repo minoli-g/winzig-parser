@@ -64,8 +64,25 @@ bool Lexer::consumePredefinedTokenIfPresent(){
         int token_length = token_value.size();
 
         if (position+token_length < content.end()){
-            std::string content_slice (position, position+token_length);
+
+            std::string content_slice (position, position+token_length);            
+
             if (content_slice == token_value){
+
+                // Now that the token has been recognized in the text, 
+                // Check whether it's possibly a piece of an identifier isntead (eg- "orange" = "or"+"range")
+                // Condition - If token is all alphabetic, the next character also shouldn't be.
+
+                bool isIdentifier = true; 
+                for (int i=0; i<token_length+1; ++i){
+                    if (!isalpha(*(position+i))){
+                        isIdentifier = false;
+                    }
+                }
+                if (isIdentifier){
+                    continue; // moves onto the next predefined token type
+                }
+
                 position += token_length;
                 tokens.push_back( Token(it.first) ); 
                 return true;
