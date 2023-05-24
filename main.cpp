@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
     try{
         parser.parseWinzig();
         TreeNode* ast = parser.returnFinalTree();
-        std::cout << ast->pprintTree(0);
+        std::cout << ast->pprintTree(0) << "\n";
 
         // Save parser output to file
         // Removed as this happens automatically on running command
