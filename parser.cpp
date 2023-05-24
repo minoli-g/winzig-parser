@@ -222,12 +222,12 @@ int Parser::parseLitList(){
     readExpectedToken(TokenType::OPENBRKT);
     tn += parseName();
 
-    while (peekNextToken().getType() != TokenType::SEMICOLON){
+    while (peekNextToken().getType() != TokenType::CLSBRKT){
         readExpectedToken(TokenType::COMMA);
         tn += parseName();
     }
     readExpectedToken(TokenType::CLSBRKT);
-    buildTree(TreeNodeType::TYPE, tn);
+    buildTree(TreeNodeType::LIT, tn);
     return 1;
 }
 
@@ -272,7 +272,8 @@ int Parser::parseFcn(){
 int Parser::parseParams(){
     int tn = 0;
     tn += parseDcln();
-    while (peekNextToken().getType() == TokenType::IDENTIFER){
+    while (peekNextToken().getType() == TokenType::SEMICOLON){
+        readExpectedToken(TokenType::SEMICOLON);
         tn += parseDcln();
     }
     buildTree(TreeNodeType::PARAMS, tn);
